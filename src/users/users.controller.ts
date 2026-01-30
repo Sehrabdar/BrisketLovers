@@ -1,16 +1,37 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { UserResponseDto } from './dto/user-response.dto';
+import { LoginDto } from 'src/core/dto/login.dto';
+import { UserLoginResponseDto } from './dto/user-login-response.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Post('register')
+  @ApiOperation({ summary: 'Create users' })
+  @ApiResponse({
+        status: 201,
+        type: UserResponseDto,
+    })
+  create(@Body() registerUserDto: RegisterUserDto):Promise<UserResponseDto> {
+    return this.usersService.create(registerUserDto);
   }
+
+  @Post('login')
+    @ApiOperation({ summary: 'This endpoint is used to login a customer' })
+    @ApiResponse({
+        status: 200,
+        type: UserLoginResponseDto,
+    })
+    async login(@Body() body: LoginDto): Promise<UserLoginResponseDto> {
+        const response = await this.usersService.login({ ...body });
+        return response;
+    }
+
 
   @Get()
   findAll() {

@@ -19,7 +19,7 @@ import { UsersModule } from './users/users.module';
         password: configService.get('postgres.password'),
         database: configService.get('postgres.dbName'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('postgres.synchronize'),
+        synchronize:true,
         autoLoadEntities: true,
       }),
       inject: [ConfigService],

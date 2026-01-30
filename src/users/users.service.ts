@@ -1,11 +1,76 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+
+import { RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from './entities/user.entity';
+import { IsNull, Repository } from 'typeorm';
+import { UserMapper } from './mapper/user.mapper';
+import { LoginDto } from '../core/dto/login.dto';
+import { UserLoginResponseDto } from './dto/user-login-response.dto';
+import { CryptoService } from '../core/crypto/crypto.service';
+import { AccountStatus, UserType } from '../core/global.constraints';
+import { AuthService } from '../core/auth/auth.service';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly userMapper: UserMapper,
+    private readonly cryptoService: CryptoService,
+    private readonly authService: AuthService
+  ) { }
+  async create(registerUserDto: RegisterUserDto): Promise<UserResponseDto> {
+    const existingUser = await this.userRepository.findOne({
+      where: {
+        email: registerUserDto.email,
+        deletedAt: IsNull(),
+      },
+    });
+    if (existingUser) {
+      throw new ConflictException(`User with ${registerUserDto.email} email already exists.`)
+    }
+    const user = this.userMapper.toPersistence(registerUserDto);
+    const userResponse = await this.userRepository.save(user);
+    return this.userMapper.toResponse(userResponse);
+  }
+
+  public async login(body: LoginDto): Promise<UserLoginResponseDto> {
+    try {
+      let user = await this.userRepository.findOne({
+        where: { email: body.email },
+      });
+      if (!user) {
+        throw new BadRequestException('Invalid Email or Password')
+      }
+
+      if (!(await this.cryptoService.isMatch(body.password, user.password))) {
+        throw new BadRequestException('Invalid email or password');
+      }
+
+      // if (user.status === AccountStatus.Deactivated) {
+      //   await this.userRepository.update({ id: customer.id }, { status: AccountStatus.Active });
+      //   user = await this.userRepository.findOneBy({ email: body.email });
+      // }
+
+      if (user.status === AccountStatus.Blacklist) {
+        throw new BadRequestException(`Admin has blacklisted ${body.email}, please contact administrator`);
+      }
+
+      return {
+        user: this.userMapper.toResponse({ ...user }),
+        ...(await this.authService.getAccessToken({
+          user: user,
+          userType: UserType.AppUser,
+        })),
+      };
+    } catch(error){
+      console.error(`Login failed due to an error: ${error}`);
+      throw error;
+    }
   }
 
   findAll() {
