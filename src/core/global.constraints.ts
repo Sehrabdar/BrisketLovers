@@ -22,3 +22,9 @@ export enum TokenType {
     Access = 'ACCESS',
     Verify = 'VERIFY'
 }
+
+export enum Role {
+  CUSTOMER = 'CUSTOMER',
+  ADMIN = 'ADMIN',
+  STAFF = 'STAFF',
+}
