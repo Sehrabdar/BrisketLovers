@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,14 +20,13 @@ import { AuthService } from '../core/auth/auth.service';
 
 @Injectable()
 export class UsersService {
-
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly userMapper: UserMapper,
     private readonly cryptoService: CryptoService,
-    private readonly authService: AuthService
-  ) { }
+    private readonly authService: AuthService,
+  ) {}
   async create(registerUserDto: RegisterUserDto): Promise<UserResponseDto> {
     const existingUser = await this.userRepository.findOne({
       where: {
@@ -31,7 +35,9 @@ export class UsersService {
       },
     });
     if (existingUser) {
-      throw new ConflictException(`User with ${registerUserDto.email} email already exists.`)
+      throw new ConflictException(
+        `User with ${registerUserDto.email} email already exists.`,
+      );
     }
     const user = this.userMapper.toPersistence(registerUserDto);
     const userResponse = await this.userRepository.save(user);
@@ -44,20 +50,17 @@ export class UsersService {
         where: { email: body.email },
       });
       if (!user) {
-        throw new BadRequestException('Invalid Email or Password')
+        throw new BadRequestException('Invalid Email or Password');
       }
 
       if (!(await this.cryptoService.isMatch(body.password, user.password))) {
         throw new BadRequestException('Invalid email or password');
       }
 
-      // if (user.status === AccountStatus.Deactivated) {
-      //   await this.userRepository.update({ id: customer.id }, { status: AccountStatus.Active });
-      //   user = await this.userRepository.findOneBy({ email: body.email });
-      // }
-
       if (user.status === AccountStatus.Blacklist) {
-        throw new BadRequestException(`Admin has blacklisted ${body.email}, please contact administrator`);
+        throw new BadRequestException(
+          `Admin has blacklisted ${body.email}, please contact administrator`,
+        );
       }
 
       return {
@@ -67,18 +70,23 @@ export class UsersService {
           userType: UserType.AppUser,
         })),
       };
-    } catch(error){
+    } catch (error) {
       console.error(`Login failed due to an error: ${error}`);
       throw error;
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string): Promise<UserResponseDto> {
+    try {
+      const user = await this.userRepository.findOneBy({id:id});
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      return this.userMapper.toResponse({ ...user });
+    } catch (error) {
+      console.error(`Failed to load the profile due to the error: ${error}`);
+      throw new error;
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

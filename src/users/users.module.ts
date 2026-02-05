@@ -14,5 +14,6 @@ import { AuthModule } from '../core/auth/auth.module';
   ],
   controllers: [UsersController],
   providers: [UsersService, UserMapper, CryptoService],
+  exports:[UsersService]
 })
 export class UsersModule {}
