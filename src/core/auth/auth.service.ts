@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidV4 } from 'uuid';
 
 import { EncodeDataArgs, TokenResponse } from './auth.type';
-import { TokenType } from '../global.constraints';
+import { Role, TokenType } from '../global.constraints';
 
 @Injectable()
 export class AuthService {
@@ -35,8 +35,8 @@ export class AuthService {
         sub: data.user.id,
         email: data.user.email,
         userType: data.userType,
+        role: data.user.role,
         tokenType,
-        id,
       },
       {
         secret: secret,

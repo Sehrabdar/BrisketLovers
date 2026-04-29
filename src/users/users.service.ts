@@ -15,7 +15,7 @@ import { UserMapper } from './mapper/user.mapper';
 import { LoginDto } from '../core/dto/login.dto';
 import { UserLoginResponseDto } from './dto/user-login-response.dto';
 import { CryptoService } from '../core/crypto/crypto.service';
-import { AccountStatus, UserType } from '../core/global.constraints';
+import { AccountStatus, Role, UserType } from '../core/global.constraints';
 import { AuthService } from '../core/auth/auth.service';
 
 @Injectable()
@@ -55,12 +55,6 @@ export class UsersService {
 
       if (!(await this.cryptoService.isMatch(body.password, user.password))) {
         throw new BadRequestException('Invalid email or password');
-      }
-
-      if (user.status === AccountStatus.Blacklist) {
-        throw new BadRequestException(
-          `Admin has blacklisted ${body.email}, please contact administrator`,
-        );
       }
 
       return {

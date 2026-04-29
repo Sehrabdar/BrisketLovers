@@ -1,12 +1,12 @@
 import { UserEntity } from '../../users/entities/user.entity';
-import { TokenType, UserType } from '../global.constraints';
+import { Role, TokenType, UserType } from '../global.constraints';
 
 export type JwtPayload = {
     sub: string;
     email: string;
     userType: UserType;
     tokenType?: TokenType;
-    id?: string;
+    role: Role;
 };
 
 export type EncodeDataArgs = {

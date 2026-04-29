@@ -13,6 +13,7 @@ import { UtilsService } from '../../core/utils/utils.service';
 import {
   AccountStatus,
   CharacterSet,
+  Role,
 } from '../../core/global.constraints';
 
 @Entity('users')
@@ -39,6 +40,13 @@ export class UserEntity extends BaseEntity {
     default: AccountStatus.Active,
   })
   status: AccountStatus;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER
+  })
+  role: Role;
 
   @BeforeInsert()
   @BeforeUpdate()
