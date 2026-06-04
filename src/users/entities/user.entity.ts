@@ -44,14 +44,14 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'enum',
     enum: Role,
-    default: Role.USER
+    default: Role.CUSTOMER,
   })
   role: Role;
 
   @BeforeInsert()
   @BeforeUpdate()
   async encryptPassword() {
-    if (this.password) {
+    if (this.password && !this.password.startsWith('$2a$') && !this.password.startsWith('$2b$')) {
       const salt = await bcrypt.genSalt();
       this.password = await bcrypt.hash(this.password, salt);
     }
@@ -59,9 +59,11 @@ export class UserEntity extends BaseEntity {
 
   @BeforeInsert()
   generateUsername() {
-    this.username = slugify(
-      `${this.name}-${UtilsService.generateUniqueId({ length: Number(process.env.SLUG_LENGTH), characterSet: CharacterSet.LowercaseAlphanumeric })}`,
-      { lower: true },
-    );
+    if (!this.username) {
+      this.username = slugify(
+        `${this.name}-${UtilsService.generateUniqueId({ length: Number(process.env.SLUG_LENGTH), characterSet: CharacterSet.LowercaseAlphanumeric })}`,
+        { lower: true },
+      );
+    }
   }
 }

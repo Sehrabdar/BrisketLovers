@@ -6,16 +6,27 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
+  app.setGlobalPrefix('api', { exclude: ['/', 'api'] });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
+      forbidNonWhitelisted: true,
     }),
   );
 
   const config = new DocumentBuilder()
-    .setTitle('API')
-    .setDescription('API documentation')
+    .setTitle('BrisketLovers API')
+    .setDescription('Restaurant Management System API')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -32,5 +43,6 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
+  console.log(`Application running on: ${await app.getUrl()}`);
 }
 bootstrap();

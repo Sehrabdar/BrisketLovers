@@ -21,17 +21,18 @@ export enum UserType {
 export enum TokenType {
   Access = 'ACCESS',
   Verify = 'VERIFY',
+  Refresh = 'REFRESH',
 }
 
 export enum Role {
-  USER = 'USER',
+  CUSTOMER = 'CUSTOMER',
   SUPERADMIN = 'SUPERADMIN',
   STAFF = 'STAFF',
 }
 
 export enum OrderDirection {
-    Asc = 'ASC',
-    Desc = 'DESC',
+  Asc = 'ASC',
+  Desc = 'DESC',
 }
 
 export enum Category {
@@ -42,12 +43,33 @@ export enum Category {
 }
 
 export enum MenuOrderBy {
-    CreatedAt = 'createdAt',
-    UpdatedAt = 'updatedAt',
-    Name = 'name',
+  CreatedAt = 'createdAt',
+  UpdatedAt = 'updatedAt',
+  Name = 'name',
 }
 
 export enum Availability {
   True = 'TRUE',
   False = 'FALSE',
+}
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  PREPARING = 'PREPARING',
+  READY = 'READY',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+}
+
+export enum AuditAction {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
 }

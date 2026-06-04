@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { RegisterUserDto } from './dto/create-user.dto';
+import { CreateStaffDto } from './dto/create-staff.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,12 +28,10 @@ export class UsersService {
     private readonly cryptoService: CryptoService,
     private readonly authService: AuthService,
   ) {}
+
   async create(registerUserDto: RegisterUserDto): Promise<UserResponseDto> {
     const existingUser = await this.userRepository.findOne({
-      where: {
-        email: registerUserDto.email,
-        deletedAt: IsNull(),
-      },
+      where: { email: registerUserDto.email, deletedAt: IsNull() },
     });
     if (existingUser) {
       throw new ConflictException(
@@ -40,54 +39,105 @@ export class UsersService {
       );
     }
     const user = this.userMapper.toPersistence(registerUserDto);
+    user.role = Role.CUSTOMER;
     const userResponse = await this.userRepository.save(user);
     return this.userMapper.toResponse(userResponse);
   }
 
   public async login(body: LoginDto): Promise<UserLoginResponseDto> {
-    try {
-      let user = await this.userRepository.findOne({
-        where: { email: body.email },
-      });
-      if (!user) {
-        throw new BadRequestException('Invalid Email or Password');
-      }
-
-      if (!(await this.cryptoService.isMatch(body.password, user.password))) {
-        throw new BadRequestException('Invalid email or password');
-      }
-
-      return {
-        user: this.userMapper.toResponse({ ...user }),
-        ...(await this.authService.getAccessToken({
-          user: user,
-          userType: UserType.AppUser,
-        })),
-      };
-    } catch (error) {
-      console.error(`Login failed due to an error: ${error}`);
-      throw error;
+    const user = await this.userRepository.findOne({
+      where: { email: body.email },
+    });
+    if (!user) {
+      throw new BadRequestException('Invalid Email or Password');
     }
+    if (user.status === AccountStatus.Deactivated) {
+      throw new BadRequestException('Account has been deactivated. Contact admin.');
+    }
+    if (!(await this.cryptoService.isMatch(body.password, user.password))) {
+      throw new BadRequestException('Invalid email or password');
+    }
+    return {
+      user: this.userMapper.toResponse({ ...user }),
+      ...this.authService.getTokens({
+        user,
+        userType: UserType.AppUser,
+      }),
+    };
   }
 
   async findOne(id: string): Promise<UserResponseDto> {
-    try {
-      const user = await this.userRepository.findOneBy({id:id});
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-      return this.userMapper.toResponse({ ...user });
-    } catch (error) {
-      console.error(`Failed to load the profile due to the error: ${error}`);
-      throw new error;
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+    return this.userMapper.toResponse({ ...user });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async findOneEntity(id: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findByEmail(email: string): Promise<UserEntity | null> {
+    return this.userRepository.findOne({ where: { email, deletedAt: IsNull() } });
+  }
+
+  // ── Staff Management (SUPERADMIN only) ──
+
+  async createStaff(dto: CreateStaffDto): Promise<UserResponseDto> {
+    const existing = await this.findByEmail(dto.email);
+    if (existing) {
+      throw new ConflictException(`User with ${dto.email} already exists.`);
+    }
+    const user = this.userMapper.toPersistence(dto);
+    user.role = Role.STAFF;
+    const saved = await this.userRepository.save(user);
+    return this.userMapper.toResponse(saved);
+  }
+
+  async updateStaff(id: string, dto: UpdateUserDto): Promise<UserResponseDto> {
+    const user = await this.findOneEntity(id);
+    if (user.role !== Role.STAFF) {
+      throw new BadRequestException('User is not a staff member');
+    }
+    Object.assign(user, dto);
+    const saved = await this.userRepository.save(user);
+    return this.userMapper.toResponse(saved);
+  }
+
+  async disableStaff(id: string): Promise<UserResponseDto> {
+    const user = await this.findOneEntity(id);
+    if (user.role !== Role.STAFF) {
+      throw new BadRequestException('User is not a staff member');
+    }
+    user.status = AccountStatus.Deactivated;
+    const saved = await this.userRepository.save(user);
+    return this.userMapper.toResponse(saved);
+  }
+
+  async listStaff(): Promise<UserResponseDto[]> {
+    const staff = await this.userRepository.find({
+      where: { role: Role.STAFF, deletedAt: IsNull() },
+      order: { createdAt: 'DESC' },
+    });
+    return staff.map((s) => this.userMapper.toResponse(s));
+  }
+
+  async updateProfile(id: string, dto: UpdateUserDto): Promise<UserResponseDto> {
+    const user = await this.findOneEntity(id);
+    if (dto.name) user.name = dto.name;
+    if (dto.phone) user.phone = dto.phone;
+    const saved = await this.userRepository.save(user);
+    return this.userMapper.toResponse(saved);
+  }
+
+  async countByRole(role: Role): Promise<number> {
+    return this.userRepository.count({
+      where: { role, status: AccountStatus.Active, deletedAt: IsNull() },
+    });
   }
 }
