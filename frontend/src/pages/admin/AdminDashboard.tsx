@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import { BarChart3, Users, ChefHat, FileClock, Plus, UserX, UserCheck, Shield, Sparkles, PlusCircle } from 'lucide-react';
+import { BarChart3, Users, ChefHat, FileClock, UserX, UserCheck, Shield, PlusCircle } from 'lucide-react';
 
 interface StaffUser {
   id: string;
@@ -49,8 +49,8 @@ export const AdminDashboard: React.FC = () => {
   const [creatingStaff, setCreatingStaff] = useState(false);
 
   // Menu Catalog State
-  const [menuItems, setMenuItems] = useState<any[]>([]);
-  const [loadingMenu, setLoadingMenu] = useState(true);
+  const [_menuItems, setMenuItems] = useState<any[]>([]);
+  const [_loadingMenu, setLoadingMenu] = useState(true);
 
   // Audit Logs State
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);

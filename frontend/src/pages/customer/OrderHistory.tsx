@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import { ShoppingBag, Eye, ArrowRight, Info } from 'lucide-react';
+import { ShoppingBag, Eye } from 'lucide-react';
 
 interface Order {
   id: string;

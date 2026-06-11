@@ -28,7 +28,7 @@ export const Menu: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [limit] = useState(12);
   const [offset, setOffset] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [_totalCount, setTotalCount] = useState(0);
 
   // Sync search inputs with URL params
   useEffect(() => {

@@ -351,6 +351,7 @@ input:focus, select:focus, textarea:focus {
 .toast-success { border-left-color: var(--success); }
 .toast-danger { border-left-color: var(--danger); }
 .toast-info { border-left-color: var(--info); }
+.toast-warning { border-left-color: var(--warning); }
 
 /* Table design styling */
 .custom-table-container {

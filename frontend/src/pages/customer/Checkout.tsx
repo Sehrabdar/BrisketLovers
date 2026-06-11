@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useToast } from '../../contexts/ToastContext';
 import { api } from '../../services/api';
-import { CreditCard, CreditCard as CardIcon, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { CreditCard, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export const Checkout: React.FC = () => {
   const { cart, clearCart } = useCart();
@@ -50,7 +50,7 @@ export const Checkout: React.FC = () => {
     setPaying(true);
     try {
       // Calls the backend confirm-mock endpoint
-      const res = await api.post(`/payments/confirm-mock/${createdOrder.id}`);
+      await api.post(`/payments/confirm-mock/${createdOrder.id}`);
       showToast('Payment successful! Order confirmed.', 'success');
       navigate(`/orders/${createdOrder.id}`);
     } catch (err: any) {

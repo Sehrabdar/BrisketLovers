@@ -3,7 +3,7 @@ import { Expose } from 'class-transformer';
 import { IsBoolean, IsEnum, IsString } from 'class-validator';
 
 import { BaseDto } from '../../core/dto/base.dto';
-import { AccountStatus } from '../../core/global.constraints';
+import { AccountStatus, Role } from '../../core/global.constraints';
 
 export class UserResponseDto extends BaseDto {
     @IsString()
@@ -30,4 +30,9 @@ export class UserResponseDto extends BaseDto {
     @IsEnum(AccountStatus)
     @ApiProperty({ enum: AccountStatus, example: AccountStatus.Active })
     readonly status: AccountStatus;
+
+    @Expose()
+    @IsEnum(Role)
+    @ApiProperty({ enum: Role, example: Role.CUSTOMER })
+    readonly role: Role;
 }

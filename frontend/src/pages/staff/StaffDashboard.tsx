@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import { ClipboardList, ChefHat, ToggleLeft, ToggleRight, DollarSign, Upload, Plus, AlertCircle, RefreshCw } from 'lucide-react';
+import { ClipboardList, ChefHat, ToggleLeft, ToggleRight, Upload, Plus, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -46,7 +46,7 @@ export const StaffDashboard: React.FC = () => {
   const [addingDish, setAddingDish] = useState(false);
 
   // File Upload State
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [_selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingForId, setUploadingForId] = useState<string | null>(null);
 
   const fetchOrders = async () => {
