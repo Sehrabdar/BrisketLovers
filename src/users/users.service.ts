@@ -131,6 +131,7 @@ export class UsersService {
     const user = await this.findOneEntity(id);
     if (dto.name) user.name = dto.name;
     if (dto.phone) user.phone = dto.phone;
+    if (dto.email) user.email = dto.email;
     const saved = await this.userRepository.save(user);
     return this.userMapper.toResponse(saved);
   }
