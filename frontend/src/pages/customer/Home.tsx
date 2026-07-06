@@ -151,9 +151,12 @@ export const Home: React.FC = () => {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>
                   Our signature brisket sliced to order: choice of moist (fatty) or lean. Beautiful smoke ring and bark.
                 </p>
-                <Link to="/menu?category=BRISKET" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {/* <Link to="/menu?category=BRISKET" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   Order Brisket &rarr;
-                </Link>
+                </Link> */}
+                <Link to="/menu" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Explore Menu
+              </Link>
               </div>
             </div>
 
@@ -165,22 +168,25 @@ export const Home: React.FC = () => {
                 alignItems: 'flex-end',
                 padding: '24px'
               }}>
-                <h3 style={{ fontSize: '1.5rem', color: '#fff' }}>Pork & Ribs</h3>
+                <h3 style={{ fontSize: '1.5rem', color: '#fff' }}>Beef & Ribs</h3>
               </div>
               <div style={{ padding: '24px' }}>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>
-                  Fall-off-the-bone baby back ribs and hand-pulled pork shoulder smoked low over Texas oak logs.
+                  Fall-off-the-bone baby back ribs and hand-pulled beef shoulder smoked low over Texas oak logs.
                 </p>
-                <Link to="/menu?category=RIBS" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {/* <Link to="/menu?category=RIBS" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   Order Ribs &rarr;
-                </Link>
+                </Link> */}
+                <Link to="/menu" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Explore Menu
+              </Link>
               </div>
             </div>
 
             <div className="card card-hover" style={{ padding: '0', overflow: 'hidden' }}>
               <div style={{
                 height: '220px',
-                background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1621996346565-e3bb6460fcb7?auto=format&fit=crop&q=80&w=600") center/cover no-repeat',
+                background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.8)), url("https://www.thespruceeats.com/thmb/UP4ThW-XO3afzbvQmdeDApgQrN0=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/easy-homemade-truffle-fries-recipe-1375725-hero-02-a9d4ccb2e72544469c044f6ddd728bf3.jpg") center/cover no-repeat',
                 display: 'flex',
                 alignItems: 'flex-end',
                 padding: '24px'
@@ -191,9 +197,12 @@ export const Home: React.FC = () => {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>
                   Complete your tray with baked mac & cheese, sweet cornbread, pit beans, and crunchy vinegar slaw.
                 </p>
-                <Link to="/menu?category=SIDES" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {/* <Link to="/menu?category=SIDES" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   Order Sides &rarr;
-                </Link>
+                </Link> */}
+                <Link to="/menu" style={{ color: 'var(--primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Explore Menu
+              </Link>
               </div>
             </div>
           </div>

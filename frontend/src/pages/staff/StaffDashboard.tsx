@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import { ClipboardList, ChefHat, ToggleLeft, ToggleRight, Upload, Plus, AlertCircle, RefreshCw } from 'lucide-react';
+import { ClipboardList, ChefHat, ToggleLeft, ToggleRight, Upload, Plus, AlertCircle, RefreshCw, Edit, Trash2 } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -44,6 +44,15 @@ export const StaffDashboard: React.FC = () => {
   const [newDishCategory, setNewDishCategory] = useState('main_course');
   const [newDishDesc, setNewDishDesc] = useState('');
   const [addingDish, setAddingDish] = useState(false);
+
+  // Modal / Form States for editing menu item
+  const [showEditMenuModal, setShowEditMenuModal] = useState(false);
+  const [editingDishId, setEditingDishId] = useState<string | null>(null);
+  const [editDishName, setEditDishName] = useState('');
+  const [editDishPrice, setEditDishPrice] = useState('');
+  const [editDishCategory, setEditDishCategory] = useState('main_course');
+  const [editDishDesc, setEditDishDesc] = useState('');
+  const [updatingDish, setUpdatingDish] = useState(false);
 
   // File Upload State
   const [_selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -123,6 +132,52 @@ export const StaffDashboard: React.FC = () => {
       showToast('Failed to create menu item', 'danger');
     } finally {
       setAddingDish(false);
+    }
+  };
+
+  const handleEditClick = (dish: MenuItem) => {
+    setEditingDishId(dish.id);
+    setEditDishName(dish.name);
+    setEditDishPrice(String(dish.price));
+    setEditDishCategory(dish.category);
+    setEditDishDesc(dish.description || '');
+    setShowEditMenuModal(true);
+  };
+
+  const handleUpdateDish = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDishId || !editDishName || !editDishPrice) {
+      showToast('Name and price are required', 'danger');
+      return;
+    }
+
+    setUpdatingDish(true);
+    try {
+      await api.patch(`/menu/${editingDishId}`, {
+        name: editDishName,
+        price: Number(editDishPrice),
+        category: editDishCategory,
+        description: editDishDesc || null,
+      });
+      showToast('Menu item updated successfully', 'success');
+      setShowEditMenuModal(false);
+      fetchMenu();
+    } catch {
+      showToast('Failed to update menu item', 'danger');
+    } finally {
+      setUpdatingDish(false);
+    }
+  };
+
+  const handleDeleteClick = async (dishId: string) => {
+    if (window.confirm('Are you sure you want to delete this menu item?')) {
+      try {
+        await api.delete(`/menu/${dishId}`);
+        showToast('Menu item deleted successfully', 'success');
+        fetchMenu();
+      } catch {
+        showToast('Failed to delete menu item', 'danger');
+      }
     }
   };
 
@@ -305,6 +360,7 @@ export const StaffDashboard: React.FC = () => {
                     <th>Price</th>
                     <th>Availability</th>
                     <th>Image Upload</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -343,6 +399,24 @@ export const StaffDashboard: React.FC = () => {
                             style={{ display: 'none' }}
                             onChange={(e) => handleFileChange(e, dish.id)}
                           />
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => handleEditClick(dish)}
+                            className="btn btn-secondary btn-sm"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 12px', fontSize: '0.8rem' }}
+                          >
+                            <Edit size={12} /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(dish.id)}
+                            className="btn btn-outline btn-sm"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 12px', fontSize: '0.8rem', borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                          >
+                            <Trash2 size={12} /> Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -436,6 +510,95 @@ export const StaffDashboard: React.FC = () => {
                   disabled={addingDish}
                 >
                   {addingDish ? 'Saving...' : 'Add Item'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Menu Item Modal Dialog */}
+      {showEditMenuModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.8)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+         }}>
+          <div className="card" style={{ width: '100%', maxWidth: '440px', padding: '32px', position: 'relative' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '24px' }}>Edit Menu Item</h2>
+            <form onSubmit={handleUpdateDish}>
+              <div className="form-group">
+                <label className="form-label">Item Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Smoky Beef Ribs"
+                  className="form-control"
+                  value={editDishName}
+                  onChange={(e) => setEditDishName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Price ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="24.99"
+                  className="form-control"
+                  value={editDishPrice}
+                  onChange={(e) => setEditDishPrice(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Category</label>
+                <select
+                  className="form-control form-select"
+                  value={editDishCategory}
+                  onChange={(e) => setEditDishCategory(e.target.value)}
+                >
+                  <option value="starter">Starter</option>
+                  <option value="main_course">Main Course</option>
+                  <option value="dessert">Dessert</option>
+                  <option value="beverage">Beverage</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Description (Optional)</label>
+                <textarea
+                  rows={2}
+                  placeholder="Details of spices, weight, preparation..."
+                  className="form-control"
+                  value={editDishDesc}
+                  onChange={(e) => setEditDishDesc(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ width: '50%' }}
+                  onClick={() => setShowEditMenuModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ width: '50%' }}
+                  disabled={updatingDish}
+                >
+                  {updatingDish ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>

@@ -124,6 +124,7 @@ export class MenuService {
     const [dishes, count] = await this.menuRepository.findAndCount({
       where: whereCondition,
       order: {
+        available: 'DESC',
         [params.orderBy]: params.orderDirection,
       },
       take: params.limit,
