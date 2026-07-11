@@ -27,7 +27,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Initialize Auth State from LocalStorage
   useEffect(() => {
     const initializeAuth = () => {
       const storedUser = localStorage.getItem('user');
@@ -44,7 +43,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    // Listen to global logout events from interceptor
     const handleLogoutEvent = () => {
       setUser(null);
     };
@@ -74,9 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (name: string, email: string, password: string, phone?: string) => {
     setIsLoading(true);
     try {
-      // Register new user
       await api.post('/users/register', { name, email, password, phone });
-      // Login automatically
       await login(email, password);
     } finally {
       setIsLoading(false);

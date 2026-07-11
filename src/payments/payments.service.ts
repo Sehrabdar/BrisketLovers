@@ -37,7 +37,6 @@ export class PaymentsService {
       throw new BadRequestException(`Order is in '${order.status}' status and cannot accept payment`);
     }
 
-    // Check if there is already a successful payment
     let payment = await this.paymentRepository.findOne({
       where: { orderId: order.id },
     });
@@ -62,7 +61,7 @@ export class PaymentsService {
         transactionId = paymentIntent.id;
       } catch (err) {
         this.logger.error(`Stripe error: ${err.message}`);
-        // If Stripe fails, fall back to mock details to prevent crashing in sandbox environments
+        // Falls back to mock values so dev/sandbox environments don't crash.
       }
     }
 
@@ -176,7 +175,7 @@ export class PaymentsService {
     };
   }
 
-  // ── Mock Confirmation (for testing and dev ease without Webhook tunnel) ──
+  // Bypasses the Stripe webhook tunnel for local testing.
   async confirmPaymentMock(orderId: string, userId: string): Promise<PaymentResponseDto> {
     const order = await this.ordersService.getOrderEntity(orderId);
 

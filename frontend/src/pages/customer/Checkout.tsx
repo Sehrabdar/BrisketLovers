@@ -16,7 +16,6 @@ export const Checkout: React.FC = () => {
   const [createdOrder, setCreatedOrder] = useState<any>(null);
   const [paying, setPaying] = useState(false);
 
-  // Card details (for mock visual form)
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
@@ -36,7 +35,6 @@ export const Checkout: React.FC = () => {
       });
       setCreatedOrder(res.data);
       showToast('Order created! Please finalize payment.', 'success');
-      // Clear local cart context
       await clearCart();
     } catch (err: any) {
       showToast(err.response?.data?.message || 'Failed to place order', 'danger');
@@ -49,7 +47,6 @@ export const Checkout: React.FC = () => {
     if (!createdOrder) return;
     setPaying(true);
     try {
-      // Calls the backend confirm-mock endpoint
       await api.post(`/payments/confirm-mock/${createdOrder.id}`);
       showToast('Payment successful! Order confirmed.', 'success');
       navigate(`/orders/${createdOrder.id}`);
@@ -62,7 +59,6 @@ export const Checkout: React.FC = () => {
 
   if (!cart || cart.items.length === 0) {
     if (createdOrder) {
-      // Order placed, waiting for payment
       return (
         <div className="container section flex-center" style={{ minHeight: '60vh', flexDirection: 'column' }}>
           <div className="card" style={{ width: '100%', maxWidth: '520px', padding: '32px', textAlign: 'center' }}>
@@ -83,7 +79,7 @@ export const Checkout: React.FC = () => {
               </div>
             </div>
 
-            {/* Simulated Payment Form */}
+
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px', textAlign: 'left' }}>
               <h3 style={{ fontSize: '1.1rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <CreditCard size={18} style={{ color: 'var(--primary)' }} />
@@ -157,7 +153,6 @@ export const Checkout: React.FC = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px', alignItems: 'flex-start' }}>
-        {/* Left Side: Delivery Form */}
         <div className="card" style={{ padding: '32px' }}>
           <h2 style={{ fontSize: '1.5rem', marginBottom: '24px' }}>Delivery Details</h2>
           
@@ -197,7 +192,6 @@ export const Checkout: React.FC = () => {
           </form>
         </div>
 
-        {/* Right Side: Order Summary */}
         <div className="card" style={{ padding: '32px', background: 'var(--bg-secondary)' }}>
           <h2 style={{ fontSize: '1.5rem', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
             Checkout Summary

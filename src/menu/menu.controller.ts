@@ -30,7 +30,6 @@ import { Roles } from '../core/decorators/roles.decorator';
 import { CurrentUser } from '../core/decorators/current-user.decorator';
 import { Role } from '../core/global.constraints';
 
-// Configure Multer Storage for Menu Item Images
 const storage = diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = process.env.UPLOAD_DIR || './uploads';
@@ -165,7 +164,6 @@ export class MenuController {
     if (!file) {
       throw new BadRequestException('File is required');
     }
-    // We store the relative upload path so it can be served
     const relativePath = `/uploads/${file.filename}`;
     return await this.menuService.updateImageUrl(id, relativePath, userId, userRole);
   }

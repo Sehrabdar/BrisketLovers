@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Get API base URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export const api = axios.create({
@@ -10,7 +9,7 @@ export const api = axios.create({
   },
 });
 
-// Interceptor to attach Access Token
+// Attach access token to outgoing requests.
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -22,7 +21,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor to handle expired tokens and auto-refresh
+// Handle expired tokens and queue requests during refresh.
 let isRefreshing = false;
 let failedQueue: any[] = [];
 
@@ -42,7 +41,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Check if it is an authentication failure
     if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh' && originalRequest.url !== '/users/login') {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -61,7 +59,6 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) {
         isRefreshing = false;
-        // No refresh token, trigger logout / redirect
         localStorage.clear();
         window.dispatchEvent(new Event('auth-logout'));
         return Promise.reject(error);

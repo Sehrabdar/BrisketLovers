@@ -53,7 +53,7 @@ export class AuthService {
     };
   }
 
-  // Keep backward compat alias
+  // Backward compatibility wrapper.
   public getAccessToken(data: EncodeDataArgs): TokenResponse {
     return this.getTokens(data);
   }

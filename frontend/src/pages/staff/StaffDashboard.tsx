@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import { ClipboardList, ChefHat, ToggleLeft, ToggleRight, Upload, Plus, AlertCircle, RefreshCw, Edit, Trash2 } from 'lucide-react';
+import { ClipboardList, ChefHat, ToggleLeft, ToggleRight, Upload, Plus, AlertCircle, RefreshCw, Edit, Trash2, BookOpen } from 'lucide-react';
+import { RecipeModal } from '../admin/RecipeModal';
 
 interface OrderItem {
   id: string;
@@ -37,7 +38,6 @@ export const StaffDashboard: React.FC = () => {
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [loadingMenu, setLoadingMenu] = useState(true);
 
-  // Modal / Form States for adding new menu item
   const [showAddMenuModal, setShowAddMenuModal] = useState(false);
   const [newDishName, setNewDishName] = useState('');
   const [newDishPrice, setNewDishPrice] = useState('');
@@ -45,7 +45,6 @@ export const StaffDashboard: React.FC = () => {
   const [newDishDesc, setNewDishDesc] = useState('');
   const [addingDish, setAddingDish] = useState(false);
 
-  // Modal / Form States for editing menu item
   const [showEditMenuModal, setShowEditMenuModal] = useState(false);
   const [editingDishId, setEditingDishId] = useState<string | null>(null);
   const [editDishName, setEditDishName] = useState('');
@@ -54,9 +53,10 @@ export const StaffDashboard: React.FC = () => {
   const [editDishDesc, setEditDishDesc] = useState('');
   const [updatingDish, setUpdatingDish] = useState(false);
 
-  // File Upload State
   const [_selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingForId, setUploadingForId] = useState<string | null>(null);
+
+  const [recipeTarget, setRecipeTarget] = useState<MenuItem | null>(null);
 
   const fetchOrders = async () => {
     setLoadingOrders(true);
@@ -353,15 +353,16 @@ export const StaffDashboard: React.FC = () => {
           ) : (
             <div className="custom-table-container">
               <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Availability</th>
-                    <th>Image Upload</th>
-                    <th>Actions</th>
-                  </tr>
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Availability</th>
+                      <th>Recipe</th>
+                      <th>Image Upload</th>
+                      <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                   {menuItems.map((dish) => (
@@ -373,6 +374,7 @@ export const StaffDashboard: React.FC = () => {
                         <button
                           onClick={() => handleToggleAvailable(dish.id)}
                           style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                          title="Auto-managed if a recipe is assigned"
                         >
                           {dish.available ? (
                             <ToggleRight size={28} style={{ color: 'var(--success)' }} />
@@ -380,6 +382,16 @@ export const StaffDashboard: React.FC = () => {
                             <ToggleLeft size={28} style={{ color: 'var(--text-muted)' }} />
                           )}
                           <span style={{ fontSize: '0.85rem' }}>{dish.available ? 'In Stock' : 'Out of Stock'}</span>
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => setRecipeTarget(dish)}
+                          className="btn btn-secondary btn-sm"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '6px 12px', fontSize: '0.8rem' }}
+                          title="Manage recipe ingredients"
+                        >
+                          <BookOpen size={12} /> Recipe
                         </button>
                       </td>
                       <td>
@@ -604,6 +616,16 @@ export const StaffDashboard: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Recipe Modal */}
+      {recipeTarget && (
+        <RecipeModal
+          menuItemId={recipeTarget.id}
+          menuItemName={recipeTarget.name}
+          onClose={() => setRecipeTarget(null)}
+          onSave={fetchMenu}
+        />
       )}
     </div>
   );

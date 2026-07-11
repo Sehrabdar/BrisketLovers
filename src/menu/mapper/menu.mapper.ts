@@ -24,10 +24,4 @@ export class MenuMapper {
             return plainToClass(MenuResponseDto, d, { excludeExtraneousValues: true });
         });
     }
-
-    // toFullResponse(data: any): UserFullResponseDto {
-    //     const d = instanceToPlain(data);
-    //     const response = plainToClass(UserFullResponseDto, d, { excludeExtraneousValues: true });
-    //     return response;
-    // }
 }

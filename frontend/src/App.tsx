@@ -6,7 +6,6 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-// Pages
 import { Home } from './pages/customer/Home';
 import { Menu } from './pages/customer/Menu';
 import { Cart } from './pages/customer/Cart';
@@ -33,14 +32,12 @@ function App() {
               
               <main style={{ flexGrow: 1 }}>
                 <Routes>
-                  {/* Public Routes */}
                   <Route path="/" element={<Home />} />
                   <Route path="/menu" element={<Menu />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
 
-                  {/* Customer Guarded Routes */}
                   <Route
                     path="/cart"
                     element={
@@ -74,7 +71,6 @@ function App() {
                     }
                   />
 
-                  {/* Shared Guarded Tracking Route */}
                   <Route
                     path="/orders/:id"
                     element={
@@ -84,7 +80,6 @@ function App() {
                     }
                   />
 
-                  {/* Staff Guarded Routes */}
                   <Route
                     path="/staff/dashboard"
                     element={
@@ -94,7 +89,6 @@ function App() {
                     }
                   />
 
-                  {/* Superadmin Guarded Routes */}
                   <Route
                     path="/admin/dashboard"
                     element={
@@ -104,7 +98,6 @@ function App() {
                     }
                   />
 
-                  {/* Fallback to Home */}
                   <Route path="*" element={<Home />} />
                 </Routes>
               </main>

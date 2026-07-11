@@ -63,8 +63,6 @@ export class UsersController {
     return this.usersService.updateProfile(userId, dto);
   }
 
-  // ── Staff Management (SUPERADMIN only) ──
-
   @Post('staff')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.SUPERADMIN)

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull, Between } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { OrderEntity } from './entities/order.entity';
 import { OrderItemEntity } from './entities/order-item.entity';
 import { CartService } from '../cart/cart.service';
@@ -8,6 +8,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderListParamsDto } from './dto/order-list-params.dto';
 import { OrderResponseDto, OrderListDto } from './dto/order-response.dto';
 import { OrderStatus, Role } from '../core/global.constraints';
+import { StockDeductionService } from '../inventory/services/stock-deduction.service';
+import { InventoryService } from '../inventory/services/inventory.service';
 
 @Injectable()
 export class OrdersService {
@@ -17,6 +19,8 @@ export class OrdersService {
     @InjectRepository(OrderItemEntity)
     private readonly orderItemRepository: Repository<OrderItemEntity>,
     private readonly cartService: CartService,
+    private readonly stockDeductionService: StockDeductionService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderResponseDto> {
@@ -26,7 +30,15 @@ export class OrdersService {
       throw new BadRequestException('Cannot place an order with an empty cart');
     }
 
-    // Create Order Entity
+    // Validate ingredient stock before locking in the order.
+    await this.inventoryService.validateStockForItems(
+      cart.items.map((i) => ({
+        menuItemId: i.menuItemId,
+        name: i.name,
+        quantity: i.quantity,
+      })),
+    );
+
     const order = this.orderRepository.create({
       userId,
       status: OrderStatus.PENDING,
@@ -36,7 +48,6 @@ export class OrdersService {
 
     const savedOrder = await this.orderRepository.save(order);
 
-    // Create Order Items Snapshots
     const orderItems = cart.items.map((cartItem) => {
       return this.orderItemRepository.create({
         orderId: savedOrder.id,
@@ -49,10 +60,8 @@ export class OrdersService {
 
     await this.orderItemRepository.save(orderItems);
 
-    // Clear cart
     await this.cartService.clearCart(userId);
 
-    // Fetch order with relationships
     const fullOrder = await this.getOrderEntityWithRelations(savedOrder.id);
     return this.mapOrderToResponse(fullOrder);
   }
@@ -104,6 +113,14 @@ export class OrdersService {
     order.updatedBy = userId;
 
     const saved = await this.orderRepository.save(order);
+
+    if (targetStatus === OrderStatus.COMPLETED) {
+      // Fire-and-forget: stock failure must not roll back the status change.
+      this.stockDeductionService.deductForOrder(saved).catch((err) => {
+        console.error(`Stock deduction failed for order ${orderId}: ${err.message}`);
+      });
+    }
+
     return this.mapOrderToResponse(saved);
   }
 
@@ -175,8 +192,6 @@ export class OrdersService {
       updatedAt: order.updatedAt,
     };
   }
-
-  // ── Analytics Functions (for Phase 8) ──
 
   async getTotalOrdersCount(): Promise<number> {
     return await this.orderRepository.count({

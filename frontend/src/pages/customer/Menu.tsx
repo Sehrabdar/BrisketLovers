@@ -30,7 +30,6 @@ export const Menu: React.FC = () => {
   const [offset, setOffset] = useState(0);
   const [_totalCount, setTotalCount] = useState(0);
 
-  // Sync search inputs with URL params
   useEffect(() => {
     const q = searchParams.get('query') || '';
     const cat = searchParams.get('category') || '';
@@ -39,7 +38,6 @@ export const Menu: React.FC = () => {
     setOffset(0);
   }, [searchParams]);
 
-  // Fetch Dishes from API
   const fetchDishes = async () => {
     setLoading(true);
     try {
@@ -51,8 +49,7 @@ export const Menu: React.FC = () => {
       };
       if (searchQuery) params.query = searchQuery;
       if (selectedCategory) {
-        // Map UI category to API Category
-        params.available = 'TRUE'; // Only show available to customers, wait, let's show all or just available. Showing all but marking out of stock is best!
+        params.available = 'TRUE';
       }
 
       const res = await api.get('/menu', { params });

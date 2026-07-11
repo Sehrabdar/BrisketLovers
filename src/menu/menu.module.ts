@@ -14,6 +14,6 @@ import { AuditLogController } from './audit-log.controller';
   ],
   controllers: [MenuController, AuditLogController],
   providers: [MenuService, AuditLogService, MenuMapper],
-  exports: [MenuService, AuditLogService],
+  exports: [MenuService, AuditLogService, TypeOrmModule],
 })
 export class MenuModule {}

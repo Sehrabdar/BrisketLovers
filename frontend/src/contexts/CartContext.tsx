@@ -10,6 +10,8 @@ export interface CartItem {
   price: number;
   quantity: number;
   subtotal: number;
+  /** -1 = no recipe (stock unlimited); >=0 = max servings available from stock */
+  availableServings: number;
 }
 
 export interface Cart {
@@ -47,7 +49,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await api.get('/cart');
       setCart(res.data);
     } catch {
-      // Quietly ignore or handle
     } finally {
       setIsLoading(false);
     }

@@ -86,8 +86,6 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email, deletedAt: IsNull() } });
   }
 
-  // ── Staff Management (SUPERADMIN only) ──
-
   async createStaff(dto: CreateStaffDto): Promise<UserResponseDto> {
     const existing = await this.findByEmail(dto.email);
     if (existing) {

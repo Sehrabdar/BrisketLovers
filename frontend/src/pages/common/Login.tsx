@@ -25,7 +25,6 @@ export const Login: React.FC = () => {
       await login(email, password);
       showToast('Welcome back to BrisketLovers!', 'success');
       
-      // Determine landing page from role
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         const u = JSON.parse(storedUser);

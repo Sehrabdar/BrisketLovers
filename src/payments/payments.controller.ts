@@ -64,7 +64,7 @@ export class PaymentsController {
     if (!signature) {
       throw new BadRequestException('Missing stripe-signature header');
     }
-    // Stripe webhooks require the raw body. If a parser already converted it, we read from rawBody if present
+    // Stripe requires the raw body for signature verification; fall back to req.body if rawBody is unavailable.
     const rawBody = (req as any).rawBody || req.body;
     const bodyString = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : JSON.stringify(rawBody);
     await this.paymentsService.handleWebhook(bodyString, signature);

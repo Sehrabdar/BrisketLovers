@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import { BarChart3, Users, ChefHat, FileClock, UserX, UserCheck, Shield, PlusCircle } from 'lucide-react';
+import { BarChart3, Users, ChefHat, FileClock, UserX, UserCheck, Shield, PlusCircle, PackageOpen } from 'lucide-react';
+import { InventoryPage } from './InventoryPage';
 
 interface StaffUser {
   id: string;
@@ -33,13 +34,11 @@ interface Analytics {
 
 export const AdminDashboard: React.FC = () => {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'analytics' | 'staff' | 'menu' | 'audit'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'staff' | 'menu' | 'audit' | 'inventory'>('analytics');
 
-  // Analytics State
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
-  // Staff Management State
   const [staff, setStaff] = useState<StaffUser[]>([]);
   const [loadingStaff, setLoadingStaff] = useState(true);
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
@@ -48,11 +47,9 @@ export const AdminDashboard: React.FC = () => {
   const [staffPassword, setStaffPassword] = useState('');
   const [creatingStaff, setCreatingStaff] = useState(false);
 
-  // Menu Catalog State
   const [_menuItems, setMenuItems] = useState<any[]>([]);
   const [_loadingMenu, setLoadingMenu] = useState(true);
 
-  // Audit Logs State
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(true);
 
@@ -166,7 +163,7 @@ export const AdminDashboard: React.FC = () => {
       );
     }
     
-    // For update, find differences
+    // Identify changed fields.
     const prev = log.previousData || {};
     const curr = log.newData || {};
     const diffs: string[] = [];
@@ -222,6 +219,12 @@ export const AdminDashboard: React.FC = () => {
             className={`btn btn-sm ${activeTab === 'audit' ? 'btn-primary' : 'btn-secondary'}`}
           >
             <FileClock size={16} /> System Logs
+          </button>
+          <button
+            onClick={() => setActiveTab('inventory')}
+            className={`btn btn-sm ${activeTab === 'inventory' ? 'btn-primary' : 'btn-secondary'}`}
+          >
+            <PackageOpen size={16} /> Inventory
           </button>
         </div>
       </div>
@@ -433,6 +436,17 @@ export const AdminDashboard: React.FC = () => {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Inventory Tab */}
+      {activeTab === 'inventory' && (
+        <div>
+          <div style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '1.5rem' }}>Inventory Management</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>Manage ingredient stock levels, set thresholds, and track automatic deductions.</p>
+          </div>
+          <InventoryPage />
         </div>
       )}
 

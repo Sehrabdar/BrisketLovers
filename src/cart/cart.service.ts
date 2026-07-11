@@ -7,6 +7,7 @@ import { MenuService } from '../menu/menu.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { CartResponseDto, CartItemResponseDto } from './dto/cart-response.dto';
+import { AvailabilityService } from '../inventory/services/availability.service';
 
 @Injectable()
 export class CartService {
@@ -16,6 +17,7 @@ export class CartService {
     @InjectRepository(CartItemEntity)
     private readonly cartItemRepository: Repository<CartItemEntity>,
     private readonly menuService: MenuService,
+    private readonly availabilityService: AvailabilityService,
   ) {}
 
   async findOrCreateCart(userId: string): Promise<CartEntity> {
@@ -58,7 +60,6 @@ export class CartService {
       await this.cartItemRepository.save(newItem);
     }
 
-    // Reload cart to get fresh items
     const updatedCart = await this.findOrCreateCart(userId);
     return this.mapCartToResponse(updatedCart);
   }
@@ -99,26 +100,44 @@ export class CartService {
     }
   }
 
-  private mapCartToResponse(cart: CartEntity): CartResponseDto {
+  private async mapCartToResponse(cart: CartEntity): Promise<CartResponseDto> {
     let totalPrice = 0;
     let totalItems = 0;
 
-    const items: CartItemResponseDto[] = cart.items.map((item) => {
-      const price = Number(item.menuItem.price);
-      const subtotal = price * item.quantity;
-      totalPrice += subtotal;
-      totalItems += item.quantity;
+    const cartSnapshot = cart.items.map((i) => ({
+      menuItemId: i.menuItemId,
+      quantity: i.quantity,
+    }));
 
-      return {
-        id: item.id,
-        menuItemId: item.menuItemId,
-        name: item.menuItem.name,
-        imageUrl: item.menuItem.imageUrl,
-        price,
-        quantity: item.quantity,
-        subtotal: Number(subtotal.toFixed(2)),
-      };
-    });
+    const items: CartItemResponseDto[] = await Promise.all(
+      cart.items.map(async (item) => {
+        const price = Number(item.menuItem.price);
+        const subtotal = price * item.quantity;
+        totalPrice += subtotal;
+        totalItems += item.quantity;
+
+        const reserved = await this.availabilityService.buildCartReservations(
+          cartSnapshot,
+          item.menuItemId,
+        );
+        const servings = await this.availabilityService.calculateServingsWithReservations(
+          item.menuItemId,
+          reserved,
+        );
+        const availableServings = servings === Infinity ? -1 : servings;
+
+        return {
+          id: item.id,
+          menuItemId: item.menuItemId,
+          name: item.menuItem.name,
+          imageUrl: item.menuItem.imageUrl,
+          price,
+          quantity: item.quantity,
+          subtotal: Number(subtotal.toFixed(2)),
+          availableServings,
+        };
+      }),
+    );
 
     return {
       id: cart.id,

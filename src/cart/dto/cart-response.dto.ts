@@ -21,6 +21,10 @@ export class CartItemResponseDto {
 
   @ApiProperty({ example: 9.99 })
   subtotal: number;
+
+  /** How many more servings stock can support. -1 = no recipe (unlimited). */
+  @ApiProperty({ example: 5 })
+  availableServings: number;
 }
 
 export class CartResponseDto {

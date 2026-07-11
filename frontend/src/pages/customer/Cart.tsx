@@ -8,9 +8,16 @@ export const Cart: React.FC = () => {
   const { cart, updateQuantity, removeFromCart, clearCart, isLoading } = useCart();
   const { showToast } = useToast();
 
-  const handleUpdateQuantity = async (itemId: string, currentQty: number, change: number) => {
+  const handleUpdateQuantity = async (itemId: string, currentQty: number, change: number, availableServings: number) => {
     const newQty = currentQty + change;
     if (newQty < 1) return;
+
+    // Block increase if it would exceed what stock can support.
+    if (change > 0 && availableServings !== -1 && newQty > availableServings) {
+      showToast(`Only ${availableServings} serving(s) available in stock`, 'warning');
+      return;
+    }
+
     try {
       await updateQuantity(itemId, newQty);
     } catch {
@@ -92,14 +99,21 @@ export const Cart: React.FC = () => {
               {/* Quantity Controls */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
                 <button
-                  onClick={() => handleUpdateQuantity(item.id, item.quantity, -1)}
+                  onClick={() => handleUpdateQuantity(item.id, item.quantity, -1, item.availableServings)}
                   style={{ cursor: 'pointer', color: item.quantity <= 1 ? 'var(--text-muted)' : 'var(--text-primary)' }}
                   disabled={item.quantity <= 1}
                 >
                   <Minus size={16} />
                 </button>
                 <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 600 }}>{item.quantity}</span>
-                <button onClick={() => handleUpdateQuantity(item.id, item.quantity, 1)} style={{ cursor: 'pointer' }}>
+                <button
+                  onClick={() => handleUpdateQuantity(item.id, item.quantity, 1, item.availableServings)}
+                  disabled={item.availableServings !== -1 && item.quantity >= item.availableServings}
+                  style={{
+                    cursor: (item.availableServings !== -1 && item.quantity >= item.availableServings) ? 'not-allowed' : 'pointer',
+                    color: (item.availableServings !== -1 && item.quantity >= item.availableServings) ? 'var(--text-muted)' : 'inherit',
+                  }}
+                >
                   <Plus size={16} />
                 </button>
               </div>

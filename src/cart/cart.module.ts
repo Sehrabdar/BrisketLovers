@@ -5,11 +5,13 @@ import { CartController } from './cart.controller';
 import { CartEntity } from './entities/cart.entity';
 import { CartItemEntity } from './entities/cart-item.entity';
 import { MenuModule } from '../menu/menu.module';
+import { InventoryModule } from '../inventory/inventory.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CartEntity, CartItemEntity]),
     MenuModule,
+    InventoryModule,
   ],
   controllers: [CartController],
   providers: [CartService],
