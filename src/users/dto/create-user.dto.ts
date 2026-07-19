@@ -24,9 +24,10 @@ export class RegisterUserDto {
     @ApiProperty({ minLength: 8, maxLength: 512 })
     readonly password: string;
 
+    @IsOptional()
     @IsString()
-    @MaxLength(16)
-    @Transform(({ value }) => value.trim())
-    @ApiProperty({ maxLength: 16, example: '7006123456', required: false })
-    readonly phone: string;
+    @MaxLength(10)
+    @Transform(({ value }) => value?.trim())
+    @ApiProperty({ maxLength: 10, example: '7006123456', required: false })
+    readonly phone?: string;
 }

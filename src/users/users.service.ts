@@ -35,7 +35,7 @@ export class UsersService {
     });
     if (existingUser) {
       throw new ConflictException(
-        `User with ${registerUserDto.email} email already exists.`,
+        'An account with this email already exists',
       );
     }
     const user = this.userMapper.toPersistence(registerUserDto);
@@ -89,7 +89,7 @@ export class UsersService {
   async createStaff(dto: CreateStaffDto): Promise<UserResponseDto> {
     const existing = await this.findByEmail(dto.email);
     if (existing) {
-      throw new ConflictException(`User with ${dto.email} already exists.`);
+      throw new ConflictException('An account with this email already exists');
     }
     const user = this.userMapper.toPersistence(dto);
     user.role = Role.STAFF;
